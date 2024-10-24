@@ -21,6 +21,67 @@ jobs:
           terraform_version: 1.5.7  # Specify the version of Terraform you're using
 
       - name: Terraform Init
+        run: |
+          if [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
+            terraform init -chdir=terraform/dev
+          elif [[ "${GITHUB_REF}" == "refs/heads/staging" ]]; then
+            terraform init -chdir=terraform/staging
+          elif [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            terraform init -chdir=terraform/prod
+          fi
+
+      - name: Terraform Plan
+        run: |
+          if [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
+            terraform plan -var-file="terraform.tfvars" -chdir=terraform/dev
+          elif [[ "${GITHUB_REF}" == "refs/heads/staging" ]]; then
+            terraform plan -var-file="terraform.tfvars" -chdir=terraform/staging
+          elif [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            terraform plan -var-file="terraform.tfvars" -chdir=terraform/prod
+          fi
+
+      - name: Terraform Apply
+        run: |
+          if [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
+            terraform apply -var-file="terraform.tfvars" -chdir=terraform/dev -auto-approve
+          elif [[ "${GITHUB_REF}" == "refs/heads/staging" ]]; then
+            terraform apply -var-file="terraform.tfvars" -chdir=terraform/staging -auto-approve
+          elif [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            terraform apply -var-file="terraform.tfvars" -chdir=terraform/prod -auto-approve
+          fi
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS_DEV }}  # This will be overridden per branch
+
+      - name: Set Google Credentials per Branch
+        run: |
+          if [[ "${GITHUB_REF}" == "refs/heads/staging" ]]; then
+            export GOOGLE_CREDENTIALS=${{ secrets.GOOGLE_CREDENTIALS_STAGING }}
+          elif [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            export GOOGLE_CREDENTIALS=${{ secrets.GOOGLE_CREDENTIALS_PROD }}
+          fi
+name: Terraform Deploy
+
+on:
+  push:
+    branches:
+      - dev      # Trigger when pushing to the dev branch
+      - staging  # Trigger when pushing to the staging branch
+      - main     # Trigger when pushing to the main branch (for prod)
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.5.7  # Specify the version of Terraform you're using
+
+      - name: Terraform Init
         run: terraform init
 
       - name: Terraform Plan
