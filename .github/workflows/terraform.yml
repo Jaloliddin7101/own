@@ -26,11 +26,11 @@ jobs:
       - name: Terraform Plan
         run: |
           if [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
-            terraform plan -var-file="dev/terraform.tfvars"
+            terraform plan -var-file="terraform/dev/terraform.tfvars"
           elif [[ "${GITHUB_REF}" == "refs/heads/staging" ]]; then
-            terraform plan -var-file="staging/terraform.tfvars"
+            terraform plan -var-file="terraform/staging/terraform.tfvars"
           elif [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
-            terraform plan -var-file="prod/terraform.tfvars"
+            terraform plan -var-file="terraform/prod/terraform.tfvars"
           fi
 
       - name: Terraform Apply
