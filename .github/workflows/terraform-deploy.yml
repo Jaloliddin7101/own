@@ -22,9 +22,6 @@ jobs:
       - name: Save Service Account Key
         run: echo "${{ secrets.GCPKEY }}" > /tmp/account.json
 
-     - name: Display Service Account Key
-        run: cat /tmp/account.json
-
       - name: Terraform Init
         run: terraform init
 
