@@ -1,1 +1,30 @@
+name: Deploy Terraform to Dev
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.2.0
+        with:
+          project_id: natural-iridium-439511-m3  
+          service_account_key: ${{ secrets.GCPKEY }}  
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
 
