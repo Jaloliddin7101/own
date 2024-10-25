@@ -19,6 +19,9 @@ jobs:
           project_id: natural-iridium-439511-m3  
           service_account_key: ${{ secrets.GCPKEY }}  
 
+      - name: Save Service Account Key
+        run: echo "${{ secrets.GCPKEY }}" > /tmp/account.json
+
       - name: Terraform Init
         run: terraform init
 
@@ -27,4 +30,3 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
-
